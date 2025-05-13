@@ -11,53 +11,40 @@ Engine::Engine()
 
 void Engine::input()
 {
-
     Event event;
-
-    while (m_Window.isOpen())
+    while (m_Window.pollEvent(event))
     {
-        while (m_Window.pollEvent(event))
+        if (event.type == Event::Closed ||
+            (event.type == Event::KeyPressed && event.key.code == Keyboard::Escape))
         {
-            if (event.type == Event::Closed)
-                m_Window.close();
+            m_Window.close();
+        }
 
-            if (event.type == Event::MouseButtonPressed)
+        if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left)
+        {
+            for (int i = 0; i < 5; ++i)
             {
-                if (event.mouseButton.button == Mouse::Left)
-                {
-                    for (size_t i = 0; i < 5; i++)
-                    {
-                        int numPoints = rand() % 26 + 25;
-                        int mouseX = event.mouseButton.x;
-                        int mouseY = event.mouseButton.y;
-                        Vector2i location(mouseX, mouseY);
-                        Particle P(m_Window, numPoints, location);
-
-                        m_particles.push_back(P);
-                    }
-                }
-            }
-            if (event.type == Event::KeyPressed && event.key.code == Keyboard::Escape)
-            {
-                m_Window.close();
+                int numPoints = 25 + rand() % 26;  // [25, 50]
+                m_particles.push_back(Particle(m_Window, numPoints, { event.mouseButton.x, event.mouseButton.y }));
             }
         }
     }
 }
 
+
 void Engine::update(float dtAsSeconds)
 {
-    for (vector<Particle>::iterator P = m_particles.begin(); P != m_particles.end();)
+    auto it = m_particles.begin();
+    while (it != m_particles.end())
     {
-        if (P->getTTL() > 0.0)
+        if (it->getTTL() > 0.0f)
         {
-            P->update(dtAsSeconds);
-            ++P;
+            it->update(dtAsSeconds);
+            ++it;
         }
-        else if (P->getTTL() == 0.0)
+        else
         {
-            P = m_particles.erase(P);
-
+            it = m_particles.erase(it);
         }
     }
 }
