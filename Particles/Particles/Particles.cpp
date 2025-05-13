@@ -1,24 +1,73 @@
 #include "Particles.h"
 
-Particle::Particle(RenderTarget& target, int numPoints, Vector2i mouseClickPosition))
+Particle::Particle(RenderTarget& target, int numPoints, Vector2i mouseClickPosition) : m_A(2, numPoints)
 {
+	m_ttl = TTL;
+	m_numPoints = numPoints;
+	m_radiansPerSec = ((float)rand() / RAND_MAX) * M_PI;
+	m_cartesianPlane.setCenter(0, 0);
+	m_cartesianPlane.setSize(target.getSize().x, (-1.0) * target.getSize().y);
+	m_centerCoordinate= target.mapPixelToCoords(mouseClickPosition, m_cartesianPlane);
+
+	m_vx = 100 + rand() % 400; // 100 to 500
+	if (rand() % 2) m_vx *= -1;
+	m_vy = 100 + rand() % 400;
+	if (rand() % 2) m_vy *= -1;
+
+
+	m_color1 = Color::White;
+	m_color2 = Color(rand() % 256, rand() % 256, rand() % 256);
+	
+	float theta = ((float)rand() / RAND_MAX) * (M_PI / 2);
+	float dTheta = (2 * M_PI) / (numPoints - 1);
+	for (int j = 0; j < numPoints; j++)
+	{
+		float r, dx, dy;
+		r = 20 + rand() % 101; // 20 to 120
+		dx = r * cos(theta);
+		dy = r * sin(theta);
+		m_A(0, j) = m_centerCoordinate.x + dx;
+		m_A(1, j) = m_centerCoordinate.y + dy;
+		theta += dTheta;
+	}
 
 }
 void Particle::draw(RenderTarget& target, RenderStates states) const
 {
+	VertexArray lines(TriangleFan, m_numPoints + 1);
+    Vector2f center = static_cast<Vector2f>(target.mapCoordsToPixel(m_centerCoordinate, m_cartesianPlane));
+	lines[0].position = center;
+	lines[0].color = m_color1;
+
+	for (int j = 1; j <= m_numPoints; ++j)
+	{
+		Vector2f vertex;
+		vertex.x = m_A(0, j - 1);
+		vertex.y = m_A(1, j - 1);
+
+		lines[j].position = static_cast<Vector2f>(target.mapCoordsToPixel(vertex, m_cartesianPlane));
+		lines[j].color = m_color2;
+	}
+	target.draw(lines, states);
 
 }
 
 void Particle::update(float dt)
 {
+	m_ttl -= dt;
+	rotate(m_radiansPerSec * dt);
+	scale(SCALE);
+	float dx = m_vx * dt;
+	float dy = m_vy * dt;
+	m_vy -= G * dt;
+	translate(dx, dy);
 
 }
 
 void Particle::translate(double xShift, double yShift)
 {
-	TranslationMatrix T(xShift, yShift);
-
-	m_A = T + m_A;
+	TranslationMatrix T(xShift, yShift, m_A.getCols());
+	m_A = m_A + T;
 	m_centerCoordinate.x += xShift;
 	m_centerCoordinate.y += yShift;
 
