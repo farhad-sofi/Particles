@@ -115,16 +115,13 @@ namespace Matrices
         }
     }
     
-   int Matrices::RotationMatrix(double theta)
-{
-    Matrix R(2, 2);
-
-    R(0, 0) = cos(theta);
-    R(0, 1) = -sin(theta);
-    R(1, 0) = sin(theta);
-    R(1, 1) = cos(theta);
-
-}
+    Matrices::RotationMatrix::RotationMatrix(double theta) : Matrix(2, 2)
+    {
+        (*this)(0, 0) = cos(theta);
+        (*this)(0, 1) = -sin(theta);
+        (*this)(1, 0) = sin(theta);
+        (*this)(1, 1) = cos(theta);
+    }
 
 int Matrices::ScalingMatrix(double scale)
 {
