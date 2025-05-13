@@ -135,8 +135,8 @@ Matrices::TranslationMatrix::TranslationMatrix(double xShift, double yShift, int
 {
     for (int i = 0; i < nCols; i++)
     {
-        T(0, i) = xShift;
-        T(1, i) = yShift;
+        (*this)(0, i) = xShift;
+        (*this)(1, i) = yShift;
     }
 
 
