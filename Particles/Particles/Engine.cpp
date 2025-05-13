@@ -76,19 +76,22 @@ void Engine::draw()
 
 void Engine::run()
 {
-	Clock clock;
-	Time time1 = clock.getElapsedTime();
+    Clock clock;
+    Time time1 = clock.getElapsedTime();
 
 
-	cout << "Starting Particle unit tests..." << endl;
-	Particle p(m_Window, 4, { (int)m_Window.getSize().x / 2, (int)m_Window.getSize().y / 2 });
-	p.unitTests();
-	cout << "Unit tests complete.  Starting engine..." << endl;
+    cout << "Starting Particle unit tests..." << endl;
+    Particle p(m_Window, 4, { (int)m_Window.getSize().x / 2, (int)m_Window.getSize().y / 2 });
+    p.unitTests();
+    cout << "Unit tests complete.  Starting engine..." << endl;
+    
+    while (m_Window.isOpen())
+    {
+        Time dt = clock.restart();
+        float dtAsSeconds = dt.asSeconds();
 
-	clock.restart();
-	float dt = time1.asSeconds();
-
-	input;
-	update(dt);
-	draw;
+        input();
+        update(dtAsSeconds);
+        draw();
+    }
 }
