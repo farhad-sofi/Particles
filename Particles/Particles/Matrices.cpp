@@ -113,6 +113,7 @@ namespace Matrices
             }
             cout << endl;
         }
+        return os;
     }
     
     Matrices::RotationMatrix::RotationMatrix(double theta) : Matrix(2, 2)
@@ -138,6 +139,6 @@ Matrices::TranslationMatrix::TranslationMatrix(double xShift, double yShift, int
         (*this)(0, i) = xShift;
         (*this)(1, i) = yShift;
     }
-
+}
 
 }
