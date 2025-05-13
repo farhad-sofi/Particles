@@ -132,7 +132,7 @@ Matrices::ScalingMatrix::ScalingMatrix(double scale) : Matrix(2,2)
     (*this)(1, 1) = scale;
 }
    
-Matrices::TranslationMatrix::TranslationMatrix(double xShift, double yShift, int nCols) : Matrix(2, nCols);
+Matrices::TranslationMatrix::TranslationMatrix(double xShift, double yShift, int nCols) : Matrix(2, nCols)
 {
     for (int i = 0; i < nCols; i++)
     {
