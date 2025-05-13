@@ -123,14 +123,12 @@ namespace Matrices
         (*this)(1, 1) = cos(theta);
     }
 
-int Matrices::ScalingMatrix(double scale)
+int Matrices::ScalingMatrix(double scale) : Matrix(2,2)
 {
-    Matrix S(2, 2);
-
-    S(0, 0) = scale;
-    S(0, 1) = 0;
-    S(1, 0) = 0;
-    S(1, 1) = scale;
+    (*this)(0, 0) = scale;
+    (*this)(0, 1) = 0;
+    (*this)(1, 0) = 0;
+    (*this)(1, 1) = scale;
 }
    
 int Matrices::TranslationMatrix(double xShift, double yShift, int nCols)
