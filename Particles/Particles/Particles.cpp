@@ -1,5 +1,7 @@
 #include "Particles.h"
 
+ParticleType Particle::mode = ParticleType::Normal;
+
 Particle::Particle(RenderTarget& target, int numPoints, Vector2i mouseClickPosition) : m_A(2, numPoints)
 {
 	m_ttl = TTL;
@@ -7,7 +9,7 @@ Particle::Particle(RenderTarget& target, int numPoints, Vector2i mouseClickPosit
 	m_radiansPerSec = ((float)rand() / RAND_MAX) * M_PI;
 	m_cartesianPlane.setCenter(0, 0);
 	m_cartesianPlane.setSize(target.getSize().x, (-1.0) * target.getSize().y);
-	m_centerCoordinate= target.mapPixelToCoords(mouseClickPosition, m_cartesianPlane);
+	m_centerCoordinate = target.mapPixelToCoords(mouseClickPosition, m_cartesianPlane);
 
 	m_vx = 100 + rand() % 400; // 100 to 500
 	if (rand() % 2) m_vx *= -1;
@@ -17,7 +19,7 @@ Particle::Particle(RenderTarget& target, int numPoints, Vector2i mouseClickPosit
 
 	m_color1 = Color::White;
 	m_color2 = Color(rand() % 256, rand() % 256, rand() % 256);
-	
+
 	float theta = ((float)rand() / RAND_MAX) * (M_PI / 2);
 	float dTheta = (2 * M_PI) / (numPoints - 1);
 	for (int j = 0; j < numPoints; j++)
@@ -35,7 +37,7 @@ Particle::Particle(RenderTarget& target, int numPoints, Vector2i mouseClickPosit
 void Particle::draw(RenderTarget& target, RenderStates states) const
 {
 	VertexArray lines(TriangleFan, m_numPoints + 1);
-    Vector2f center = static_cast<Vector2f>(target.mapCoordsToPixel(m_centerCoordinate, m_cartesianPlane));
+	Vector2f center = static_cast<Vector2f>(target.mapCoordsToPixel(m_centerCoordinate, m_cartesianPlane));
 	lines[0].position = center;
 	lines[0].color = m_color1;
 
@@ -57,10 +59,26 @@ void Particle::update(float dt)
 	m_ttl -= dt;
 	rotate(m_radiansPerSec * dt);
 	scale(SCALE);
-	float dx = m_vx * dt;
-	float dy = m_vy * dt;
-	m_vy -= G * dt;
-	translate(dx, dy);
+	
+	float dx;
+	float dy;
+	if (mode == Normal) {
+		dx = m_vx * dt;
+		dy = m_vy * dt;
+
+		m_vy -= G * dt;
+		translate(dx, dy);
+	}
+	else {
+		applyExtraCredit(dt);
+	}
+
+
+
+
+
+
+
 
 }
 
@@ -232,3 +250,45 @@ void Particle::unitTests()
 	cout << "Score: " << score << " / 7" << endl;
 
 }
+
+
+void Particle::applyExtraCredit(float dt)
+{
+	Vector2f mouse = getMappedMousePosition();
+
+
+
+
+	float attractionStrength = 5.0f; // attraction strength
+	float mx = (mouse.x - m_centerCoordinate.x) * dt * attractionStrength;
+	float my = (mouse.y - m_centerCoordinate.y) * dt * attractionStrength;
+	translate(mx, my);
+
+	Uint8 r = (m_color2.r + 1) % 256;
+	Uint8 g = (m_color2.g + 2) % 256;
+	Uint8 b = (m_color2.b + 3) % 256;
+	m_color2 = Color(r, g, b);
+
+}
+
+
+
+
+Vector2f Particle::getMappedMousePosition() const
+{
+	Vector2i pixelPos = Mouse::getPosition();
+
+	Vector2f viewCenter = m_cartesianPlane.getCenter();
+	Vector2f viewSize = m_cartesianPlane.getSize();
+
+	float windowWidth = static_cast<float>(VideoMode::getDesktopMode().width);
+	float windowHeight = static_cast<float>(VideoMode::getDesktopMode().height);
+
+	Vector2f mapped;
+	mapped.x = ((float)pixelPos.x / windowWidth - 0.5f) * viewSize.x + viewCenter.x;
+	mapped.y = ((float)pixelPos.y / windowHeight - 0.5f) * viewSize.y + viewCenter.y;
+
+	return mapped;
+}
+
+
