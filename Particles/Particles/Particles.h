@@ -46,7 +46,10 @@ private:
 	Matrix m_A;
 
 
+
+
 	void rotate(double theta);
+
 
 	void scale(double c);
 
