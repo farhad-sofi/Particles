@@ -1,39 +1,71 @@
 #include "Engine.h"
 
+Engine::Mode Engine::mode = Engine::Normal;
+
 Engine::Engine()
 {
-	int pixelWidth = VideoMode::getDesktopMode().width;
-	int pixelHeight = VideoMode::getDesktopMode().height;
-	VideoMode vm(pixelWidth, pixelHeight);
-	m_Window.create( vm, "Particles", Style::Default );
+    int pixelWidth = VideoMode::getDesktopMode().width;
+    int pixelHeight = VideoMode::getDesktopMode().height;
+    VideoMode vm(pixelWidth, pixelHeight);
+    m_Window.create(vm, "Particles", Style::Default);
+
+    if (!m_trailTexture.create(m_Window.getSize().x, m_Window.getSize().y))
+    {
+        throw std::runtime_error("Failed to create trail texture");
+    }
+    m_trailTexture.setView(m_Window.getDefaultView());
+    m_trailSprite.setTexture(m_trailTexture.getTexture());
+ 
 
 }
-
 void Engine::input()
 {
     Event event;
     while (m_Window.pollEvent(event))
     {
-        if (event.type == Event::Closed ||
-            (event.type == Event::KeyPressed && event.key.code == Keyboard::Escape))
+        if (event.type == Event::Closed || (event.type == Event::KeyPressed && event.key.code == Keyboard::Escape))
         {
             m_Window.close();
+        }
+        if (event.type == Event::KeyPressed)
+        {
+            if (event.key.code == Keyboard::S)
+            {
+                Particle::mode = (Particle::mode == ParticleType::Spiral ? ParticleType::Normal : ParticleType::Spiral);
+            }
         }
 
         if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left)
         {
-            for (int i = 0; i < 5; ++i)
-            {
-                int numPoints = 25 + rand() % 26;  // [25, 50]
-                m_particles.push_back(Particle(m_Window, numPoints, { event.mouseButton.x, event.mouseButton.y }));
-            }
+            
+            m_mouseHeld = true;
+        }
+        else if (event.type == Event::MouseButtonReleased && event.mouseButton.button == Mouse::Left)
+        {
+            m_mouseHeld = false;
         }
     }
 }
 
 
+
 void Engine::update(float dtAsSeconds)
 {
+
+
+    if (m_mouseHeld && m_Window.hasFocus())
+    {
+        Vector2i mousePos = Mouse::getPosition(m_Window);
+
+        // Spawn 2 particles per frame while mouse is held
+        for (int i = 0; i < 2; ++i)
+        {
+            int numPoints = 25 + rand() % 26;
+            m_particles.push_back(Particle(m_Window, numPoints, mousePos));
+        }
+    }
+
+    // Update and remove expired particles
     auto it = m_particles.begin();
     while (it != m_particles.end())
     {
@@ -44,22 +76,39 @@ void Engine::update(float dtAsSeconds)
         }
         else
         {
-            it = m_particles.erase(it);
+            it = m_particles.erase(it);  // erase returns valid next iterator
         }
     }
 }
 
+
+
 void Engine::draw()
 {
-    m_Window.clear();
+
+    RectangleShape fade(Vector2f(m_Window.getSize()));
+    fade.setFillColor(Color(0, 0,0, 20)); // 0 = no fade, 255 = instant erase
+    m_trailTexture.draw(fade);
+
+    // Clear the trail texture
 
     for (auto& particle : m_particles)
     {
-        m_Window.draw(particle);  
-    }
+        m_trailTexture.draw(particle);
 
+    }
+    m_trailTexture.display(); 
+
+    // Draw trail texture to window
+    m_Window.clear();
+    m_Window.draw(m_trailSprite);
     m_Window.display();
+
+
+
+
 }
+
 
 void Engine::run()
 {
@@ -81,4 +130,8 @@ void Engine::run()
         update(dtAsSeconds);
         draw();
     }
+
 }
+
+
+
