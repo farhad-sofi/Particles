@@ -1,11 +1,3 @@
-#pragma once
-
-#include <SFML/Graphics.hpp>
-#include "Particles.h"
-using namespace sf;
-using namespace std;
-
-
 class Engine
 {
 private:
@@ -22,17 +14,19 @@ private:
 	RenderTexture m_trailTexture;
 	Sprite m_trailSprite;
 
+	sf::SoundBuffer m_fireworkBuffer;
+	sf::Sound       m_fireworkSound;
 
 
-	
+
+
+
 
 
 public:
-
+	// The Engine constructor
 	Engine();
+	// Run will call all the private functions
 	void run();
-	enum Mode { Normal, BlackHole };
 
-	static Mode mode;
 };
-
