@@ -15,7 +15,7 @@ Engine::Engine()
     }
     m_trailTexture.setView(m_Window.getDefaultView());
     m_trailSprite.setTexture(m_trailTexture.getTexture());
- 
+
 
 }
 void Engine::input()
@@ -32,12 +32,13 @@ void Engine::input()
             if (event.key.code == Keyboard::S)
             {
                 Particle::mode = (Particle::mode == ParticleType::Spiral ? ParticleType::Normal : ParticleType::Spiral);
+
             }
         }
 
         if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left)
         {
-            
+
             m_mouseHeld = true;
         }
         else if (event.type == Event::MouseButtonReleased && event.mouseButton.button == Mouse::Left)
@@ -84,27 +85,51 @@ void Engine::update(float dtAsSeconds)
 
 
 void Engine::draw()
-{
+{   
+
+    Font font;
+    if (!font.loadFromFile("times.ttf")) {
+        cerr << "Failed to load font!" << endl;
+    }
+    Text currentMode("", font, 50);
+    currentMode.setPosition(20, 20);
+    currentMode.setFillColor(Color(255, 255, 255, 255));
 
     RectangleShape fade(Vector2f(m_Window.getSize()));
-    fade.setFillColor(Color(0, 0,0, 20)); // 0 = no fade, 255 = instant erase
+    fade.setFillColor(Color(0, 0, 0, 10)); // 0 = no fade, 255 = instant erase
     m_trailTexture.draw(fade);
+    
 
     // Clear the trail texture
+    if (Particle::mode == Spiral)
+    {
+        currentMode.setString("Current Mode : Spiral");
+
+    }
+    else
+    {
+        currentMode.setString("Current Mode : Normal");
+    }
+
 
     for (auto& particle : m_particles)
     {
         m_trailTexture.draw(particle);
-
+        m_trailTexture.draw(currentMode);
     }
-    m_trailTexture.display(); 
+
+    
+
+
+    m_trailTexture.display();
+
 
     // Draw trail texture to window
     m_Window.clear();
+    
     m_Window.draw(m_trailSprite);
+    
     m_Window.display();
-
-
 
 
 }
@@ -115,12 +140,11 @@ void Engine::run()
     Clock clock;
     Time time1 = clock.getElapsedTime();
 
-
     cout << "Starting Particle unit tests..." << endl;
     Particle p(m_Window, 4, { (int)m_Window.getSize().x / 2, (int)m_Window.getSize().y / 2 });
     p.unitTests();
     cout << "Unit tests complete.  Starting engine..." << endl;
-    
+
     while (m_Window.isOpen())
     {
         Time dt = clock.restart();
