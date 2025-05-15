@@ -11,10 +11,21 @@ Particle::Particle(RenderTarget& target, int numPoints, Vector2i mouseClickPosit
 	m_cartesianPlane.setSize(target.getSize().x, (-1.0) * target.getSize().y);
 	m_centerCoordinate = target.mapPixelToCoords(mouseClickPosition, m_cartesianPlane);
 
-	m_vx = 100 + rand() % 400; // 100 to 500
-	if (rand() % 2) m_vx *= -1;
-	m_vy = 100 + rand() % 400;
-	if (rand() % 2) m_vy *= -1;
+
+	if (mode == Normal) {
+		m_vx = 100 + rand() % 400; // 100 to 500
+		if (rand() % 2) m_vx *= -1;
+		m_vy = 100 + rand() % 400;
+		if (rand() % 2) m_vy *= -1;
+	}
+	else {
+		m_vx = 900 + rand() % 1000; // 100 to 500
+		if (rand() % 2) m_vx *= -1;
+		m_vy = 900 + rand() % 1000;
+		if (rand() % 2) m_vy *= -1;
+	}
+
+
 
 
 	m_color1 = Color::White;
@@ -256,10 +267,8 @@ void Particle::applyExtraCredit(float dt)
 {
 	Vector2f mouse = getMappedMousePosition();
 
-
-
-
-	float attractionStrength = 5.0f; // attraction strength
+	float attractionStrength = -2.0f; // attraction strength
+	
 	float mx = (mouse.x - m_centerCoordinate.x) * dt * attractionStrength;
 	float my = (mouse.y - m_centerCoordinate.y) * dt * attractionStrength;
 	translate(mx, my);
@@ -268,6 +277,9 @@ void Particle::applyExtraCredit(float dt)
 	Uint8 g = (m_color2.g + 2) % 256;
 	Uint8 b = (m_color2.b + 3) % 256;
 	m_color2 = Color(r, g, b);
+
+
+
 
 }
 
