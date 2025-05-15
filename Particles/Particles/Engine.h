@@ -1,3 +1,16 @@
+#pragma once
+
+#include <SFML/Graphics.hpp>
+
+#include <SFML/Audio.hpp>
+#include "Particles.h"
+
+
+
+using namespace sf;
+using namespace std;
+
+
 class Engine
 {
 private:
@@ -30,3 +43,4 @@ public:
 	void run();
 
 };
+
