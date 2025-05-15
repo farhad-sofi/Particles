@@ -1,6 +1,6 @@
 #include "Engine.h"
 
-Engine::Mode Engine::mode = Engine::Normal;
+
 
 Engine::Engine()
 {
@@ -15,7 +15,12 @@ Engine::Engine()
     }
     m_trailTexture.setView(m_Window.getDefaultView());
     m_trailSprite.setTexture(m_trailTexture.getTexture());
+    if (!m_fireworkBuffer.loadFromFile("firework.wav"))
+        throw std::runtime_error("Failed to load firework.wav");
 
+    m_fireworkSound.setBuffer(m_fireworkBuffer);
+
+ 
 
 }
 void Engine::input()
@@ -32,14 +37,14 @@ void Engine::input()
             if (event.key.code == Keyboard::S)
             {
                 Particle::mode = (Particle::mode == ParticleType::Spiral ? ParticleType::Normal : ParticleType::Spiral);
-
             }
         }
 
         if (event.type == Event::MouseButtonPressed && event.mouseButton.button == Mouse::Left)
         {
-
+            
             m_mouseHeld = true;
+            
         }
         else if (event.type == Event::MouseButtonReleased && event.mouseButton.button == Mouse::Left)
         {
@@ -63,10 +68,11 @@ void Engine::update(float dtAsSeconds)
         {
             int numPoints = 25 + rand() % 26;
             m_particles.push_back(Particle(m_Window, numPoints, mousePos));
+            m_fireworkSound.play();
         }
     }
 
-    // Update and remove expired particles
+
     auto it = m_particles.begin();
     while (it != m_particles.end())
     {
@@ -85,7 +91,7 @@ void Engine::update(float dtAsSeconds)
 
 
 void Engine::draw()
-{   
+{
 
     Font font;
     if (!font.loadFromFile("times.ttf")) {
@@ -98,7 +104,7 @@ void Engine::draw()
     RectangleShape fade(Vector2f(m_Window.getSize()));
     fade.setFillColor(Color(0, 0, 0, 10)); // 0 = no fade, 255 = instant erase
     m_trailTexture.draw(fade);
-    
+
 
     // Clear the trail texture
     if (Particle::mode == Spiral)
@@ -118,7 +124,7 @@ void Engine::draw()
         m_trailTexture.draw(currentMode);
     }
 
-    
+
 
 
     m_trailTexture.display();
@@ -126,9 +132,9 @@ void Engine::draw()
 
     // Draw trail texture to window
     m_Window.clear();
-    
+
     m_Window.draw(m_trailSprite);
-    
+
     m_Window.display();
 
 
@@ -140,11 +146,12 @@ void Engine::run()
     Clock clock;
     Time time1 = clock.getElapsedTime();
 
+
     cout << "Starting Particle unit tests..." << endl;
     Particle p(m_Window, 4, { (int)m_Window.getSize().x / 2, (int)m_Window.getSize().y / 2 });
     p.unitTests();
     cout << "Unit tests complete.  Starting engine..." << endl;
-
+    
     while (m_Window.isOpen())
     {
         Time dt = clock.restart();
